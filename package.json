@@ -1,0 +1,15 @@
+{
+  "name": "images-shrink",
+  "version": "1.0.0",
+  "description": "App to optimize images",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "nodeamon --exec electron ."
+  },
+  "author": "iMoeGirl",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^10.1.2"
+  }
+}
