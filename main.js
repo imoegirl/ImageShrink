@@ -53,7 +53,7 @@ function createAboutWindow() {
 app.on("ready", () => {
   createMainWindow();
   const menu = Menu.buildFromTemplate(menuTemplate);
-  // Menu.setApplicationMenu(menu);
+  Menu.setApplicationMenu(menu);
 
   // globalShortcut.register("CmdOrCtrl+R", () => {
   //   mainWindow.reload();
