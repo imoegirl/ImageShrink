@@ -9,5 +9,7 @@ Electron Demo
 ### 打包
 
 `npm run package-win`
+
 `npm run package-mac`
-`npm run package-linux``
+
+`npm run package-linux`
