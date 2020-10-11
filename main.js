@@ -1,7 +1,22 @@
-const { app, BrowserWindow, Menu, globalShortcut } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  globalShortcut,
+  ipcMain,
+  shell,
+} = require("electron");
 
-process.env.NODE_ENV = "development";
-// process.env.NODE_ENV = "production";
+const path = require("path");
+const os = require("os");
+const imagemin = require("imagemin");
+const imageminMozjpeg = require("imagemin-mozjpeg");
+const imageminPngquant = require("imagemin-pngquant");
+const slash = require("slash");
+const log = require("electron-log");
+
+// process.env.NODE_ENV = "development";
+process.env.NODE_ENV = "production";
 const isDev = process.env.NODE_ENV !== "production" ? true : false;
 const isMac = process.platform === "darwin" ? true : false;
 
@@ -23,12 +38,19 @@ let aboutWindow;
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     title: "ImageShrink",
-    width: 500,
+    width: isDev ? 800 : 500,
     height: 600,
     icon: "./assets/icons/coffee_256.png",
     resizable: isDev ? true : false,
     backgroundColor: "#FFFFFF",
+    webPreferences: {
+      nodeIntegration: true,
+    },
   });
+
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
 
   //   mainWindow.loadURL("https://imoegirl.com");
   //   mainWindow.loadURL(`file://${__dirname}/app/index.html`);
@@ -81,3 +103,30 @@ app.on("activate", () => {
     createMainWindow();
   }
 });
+
+ipcMain.on("image:minimize", (e, options) => {
+  options.dest = path.join(os.homedir(), "imageshrink");
+  shrinkImage(options);
+});
+
+async function shrinkImage({ imgPath, quality, dest }) {
+  try {
+    const pngQuality = quality / 100;
+    const files = await imagemin([slash(imgPath)], {
+      destination: dest,
+      plugins: [
+        imageminMozjpeg({ quality }),
+        imageminPngquant({
+          quality: [pngQuality, pngQuality],
+        }),
+      ],
+    });
+
+    log.info(files);
+    shell.openPath(dest);
+
+    mainWindow.webContents.send("image:done");
+  } catch (err) {
+    log.error(err);
+  }
+}
